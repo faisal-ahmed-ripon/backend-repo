@@ -6,13 +6,17 @@ const Order = require('./models/Order');
 
 const app = express();
 
-// Simple CORS configuration
-app.use(cors());  // সব origin থেকে request allow করবে
+// CORS Configuration
+app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"]
+}));
 
 // Middleware
 app.use(express.json());
 
-// MongoDB Connect Function
+// MongoDB Connect
 mongoose.set('strictQuery', false);
 
 const uri = process.env.MONGODB_URI || process.env.MONGODB_URI_LOCAL;
@@ -23,22 +27,16 @@ mongoose.connect(uri, {
 .then(() => console.log("✅ MongoDB Connected Successfully!"))
 .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
-// Orders API endpoint
+// Orders API
 app.post('/api/orders', async (req, res) => {
     try {
         console.log('Received order:', req.body);
         const newOrder = new Order(req.body);
         const savedOrder = await newOrder.save();
-        res.status(201).json({ 
-            success: true, 
-            order: savedOrder 
-        });
+        res.status(201).json({ success: true, order: savedOrder });
     } catch (error) {
         console.error('Order error:', error);
-        res.status(400).json({ 
-            success: false, 
-            message: error.message 
-        });
+        res.status(400).json({ success: false, message: error.message });
     }
 });
 
